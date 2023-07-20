@@ -57,7 +57,7 @@ DUMMY_PLACES.push(createdPlace);
 res.status(200).json({place:createdPlace});
 };
 
-exports.getPlaces=getPlaces();
-exports.getPlaceById=getPlaceById();
-exports.getPlaceByUserId=getPlaceByUserId();
-exports.createPlace=createPlace();
+exports.getPlaces=getPlaces;
+exports.getPlaceById=getPlaceById;
+exports.getPlaceByUserId=getPlaceByUserId;
+exports.createPlace=createPlace;
