@@ -6,6 +6,9 @@ const placesRoutes= require('./routes/places-routes');
 
 const app= express();
 
+//parse any incoming request body and extract any json data which is in there
+app.use(bodyParser.json());
+
 //now this acts as express middleware
 app.use('/api/places',placesRoutes);
 
