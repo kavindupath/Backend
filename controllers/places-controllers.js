@@ -1,7 +1,7 @@
 const HttpError= require('../models/http-error');
 const {v4:uuidv4} =require('uuid');
 
-const DUMMY_PLACES=[
+let DUMMY_PLACES=[
     {
         ID:'P1',
         Name:'Sigiriya',
@@ -46,18 +46,44 @@ const getPlaceByUserId= (req, res,next)=>{
 
 
 const createPlace =(req, res)=>{
-const {Name, Creator} =req.body;
+const {name, creator} =req.body;
 const createdPlace= {
     ID:uuidv4(),
-    Name: Name,
-    Creator:Creator
+    Name: name,
+    Creator:creator
 }
 
 DUMMY_PLACES.push(createdPlace);
 res.status(200).json({place:createdPlace});
 };
 
+
+const updatePlace =(req, res, next)=>{
+    const {name, creator} =req.body;
+    const placeId=req.params.pid;
+
+    const updatedPLace={...DUMMY_PLACES.find(p=>p.ID===placeId)}; // use the spread operator
+    const placeIndex= DUMMY_PLACES.findIndex(p=>p.ID===placeId);
+
+    updatedPLace.Name=name;
+    updatedPLace.Creator=creator;
+
+    DUMMY_PLACES[placeIndex]=updatedPLace;
+    res.status(200).json({place:updatedPLace});
+
+
+};
+
+const deletePlace = (req, res, next) =>{
+    const placeid= req.params.pid;
+    DUMMY_PLACES=DUMMY_PLACES.filter(p=>p.ID!==placeid);
+    res.status(200).json({message:'Deleted Place'});
+    
+};
+
 exports.getPlaces=getPlaces;
 exports.getPlaceById=getPlaceById;
 exports.getPlaceByUserId=getPlaceByUserId;
 exports.createPlace=createPlace;
+exports.updatePlace= updatePlace;
+exports.deletePlace=deletePlace;
