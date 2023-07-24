@@ -33,15 +33,15 @@ const getPlaceById = (req,res,next)=>{
 
 const getPlacesByUserId= (req, res,next)=>{
     const userID=req.params.uID;
+    
     const places= DUMMY_PLACES.filter(p=>{
         return p.Creator===userID;
     });
-    
     if(!places  || places.length===0){
         const error= new HttpError('Could not find a places for a given user id',404);
         return next(error);
     }
-    res.json({place});
+    res.json({places});
 };
 
 

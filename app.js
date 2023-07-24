@@ -3,6 +3,7 @@ const bodyParser= require("body-parser");
 
 
 const placesRoutes= require('./routes/places-routes');
+const usersRoutes =require('./routes/users-route');
 
 const app= express();
 
@@ -11,6 +12,7 @@ app.use(bodyParser.json());
 
 //now this acts as express middleware
 app.use('/api/places',placesRoutes);
+app.use('/api/users',usersRoutes);
 
 //error handling middleware of express
 //This functin will execute if any function in the middleware have an error
