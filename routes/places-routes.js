@@ -1,5 +1,6 @@
 const express = require ("express");
 const router = express.Router();
+const {check} = require('express-validator');
 
 const placesControllers=require('../controllers/places-controllers')
 
@@ -9,7 +10,8 @@ router.get('/:pid',placesControllers.getPlaceById);
 
 router.get('/user/:uID',placesControllers.getPlacesByUserId);
 
-router.post('/', placesControllers.createPlace);
+//Check () is another express middleware used for validating 
+router.post('/',[check('Name').not().isEmpty(),check('Creator').not().isEmpty()], placesControllers.createPlace);
 
 router.patch('/:pid',placesControllers.updatePlace);
 

@@ -1,5 +1,6 @@
 const HttpError= require('../models/http-error');
 const {v4:uuidv4} =require('uuid');
+const {validationResult}= require('express-validator')
 
 let DUMMY_PLACES=[
     {
@@ -46,11 +47,18 @@ const getPlacesByUserId= (req, res,next)=>{
 
 
 const createPlace =(req, res)=>{
-const {name, creator} =req.body;
+
+const validationError= validationResult(req);
+if(!validationError.isEmpty()){
+    console.log('Error puthe ');
+    throw new HttpError('invalid input passed please check your data',422);
+}
+
+const {Name, Creator} =req.body;
 const createdPlace= {
     ID:uuidv4(),
-    Name: name,
-    Creator:creator
+    Name: Name,
+    Creator:Creator
 }
 
 DUMMY_PLACES.push(createdPlace);
