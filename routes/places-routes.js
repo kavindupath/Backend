@@ -11,7 +11,7 @@ router.get('/:pid',placesControllers.getPlaceById);
 router.get('/user/:uID',placesControllers.getPlacesByUserId);
 
 //Check () is another express middleware used for validating 
-router.post('/',[check('Name').not().isEmpty(),check('Creator').not().isEmpty()], placesControllers.createPlace);
+router.post('/',[check('title').not().isEmpty(),check('creator').not().isEmpty()], placesControllers.createPlace);
 
 router.patch('/:pid',[check('Name').not().isEmpty()],placesControllers.updatePlace);
 
