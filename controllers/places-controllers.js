@@ -1,7 +1,6 @@
 const HttpError = require("../models/http-error");
 const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
-const mongoose =require('mongoose');
 const getCordinateForAddress = require("../utils/location");
 const Place=require('../models/place');
 
@@ -63,14 +62,17 @@ const getPlacesByUserId = (req, res, next) => {
   res.json({ places });
 };
 
-const createPlace = async (req, res,next) => {
+const createPlace = async (req, res, next) => {
   //validate the request
   const validationError = validationResult(req);
   if (!validationError.isEmpty()) {
     console.log("Error in creating new places");
-    return next(new HttpError("invalid input passed please check your data", 422)); // for async function use next() instead of throw
+    return next(
+      new HttpError("invalid input passed please check your data", 422)
+    ); // for async function use next() instead of throw
   }
 
+  //get the data from the request body
   const { title, creator, description, address } = req.body;
 
   //get the cordinates from the Google API
@@ -80,22 +82,22 @@ const createPlace = async (req, res,next) => {
   } catch (error) {
     return next(error);
   }
+  //create a new place object
   const createdPlace = new Place({
     title,
     description,
     creator,
     address,
-    location:cordinates,
-    image:"string url"
-
+    location: cordinates,
+    image: "string url",
   });
-  console.log(createdPlace)
+
+  //save the Place object with the data in the MONGO DB
   try {
     await createdPlace.save();
-    console.log('save uth una')
-
+    console.log("A new Place saved");
   } catch (err) {
-    const error=new HttpError('creating place failed',500);
+    const error = new HttpError("creating place failed", 500);
     return next(error);
   }
   res.status(200).json({ place: createdPlace });
