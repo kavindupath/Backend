@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
 const getCordinateForAddress = require("../utils/location");
 const Place=require('../models/place');
+const place = require("../models/place");
 
 let DUMMY_PLACES = [
   {
@@ -117,25 +118,32 @@ const createPlace = async (req, res, next) => {
   res.status(200).json({ place: createdPlace });
 };
 
-const updatePlace = (req, res, next) => {
+const updatePlace = async (req, res, next) => {
   const validationError = validationResult(req);
   if (!validationError.isEmpty()) {
     console.log("Error in updating places");
     throw new HttpError("invalid input passed please check your data", 422);
   }
-  const { name, creator, description, address, location } = req.body;
+  const { title, creator, description } = req.body;
   const placeId = req.params.pid;
+  let updatedPlace = new Place();
+  try {
+    updatedPlace = await Place.findById(placeId);
+  } catch (error) {
+    console.log("Error in updating");
+  }
 
-  const updatedPLace = { ...DUMMY_PLACES.find((p) => p.ID === placeId) }; // use the spread operator
-  const placeIndex = DUMMY_PLACES.findIndex((p) => p.ID === placeId);
+  updatedPlace.title = title;
+  updatedPlace.creator = creator;
+  updatedPlace.description = description;
+  try {
+    await updatedPlace.save();
+    console.log("The  Place updated");
+  } catch (error) {
+    console.log("Could not update the place" + error);
+  }
 
-  updatedPLace.Name = name;
-  updatedPLace.Creator = creator;
-  updatedPLace.description = description;
-  (updatePLace.location = location), (updatedPLace.address = address);
-
-  DUMMY_PLACES[placeIndex] = updatedPLace;
-  res.status(200).json({ place: updatedPLace });
+  res.status(200).json({ place: updatedPlace.toObject({ getters: true }) });
 };
 
 const deletePlace = (req, res, next) => {
