@@ -33,17 +33,27 @@ const getPlaces = (req, res, next) => {
   console.log("places");
 };
 
-const getPlaceById = (req, res, next) => {
+const getPlaceById = async (req, res, next) => {
+  let place;
   const placeId = req.params.pid;
-  const place = DUMMY_PLACES.find((p) => {
-    return p.ID === placeId;
-  });
+
+  try {
+    place = await Place.findById(placeId);
+  } catch (err) {
+    console.log("Could not find a place" + err);
+  }
 
   if (!place) {
     const error = new HttpError("Could not find a place for a given id", 404);
     throw error; // already cancels the function execution so no need to call 'return'
   }
-  res.json({ place });
+  //The toObject() method is usually used in Mongoose.
+  // this method is used to convert the Mongoose document to a plain JavaScript object.
+  /*{ getters: true }: This is an optional parameter passed to the toObject() method. 
+  When getters is set to true, it includes any virtual properties defined in the Mongoose schema as part of the resulting object. 
+  Virtual properties are properties that are not stored directly in the database but are derived from other properties or computed on the fly. */
+  //Here in our case to convert _id to id
+  res.json({ place: place.toObject({ getters: true }) });
 };
 
 const getPlacesByUserId = (req, res, next) => {
