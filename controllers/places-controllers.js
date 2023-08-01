@@ -95,12 +95,12 @@ const createPlace = async (req, res, next) => {
   //save the Place object with the data in the MONGO DB
   try {
     await createdPlace.save();
+    res.status(200).json({ place: createdPlace });
     console.log("A new Place saved");
   } catch (err) {
     const error = new HttpError("creating place failed", 500);
     return next(error);
   }
-  res.status(200).json({ place: createdPlace });
 };
 
 const updatePlace = async (req, res, next) => {
@@ -125,7 +125,9 @@ const updatePlace = async (req, res, next) => {
     await updatedPlace.save();
     console.log("The  Place updated");
   } catch (error) {
-    console.log("Could not update the place" + error);
+    console.log("Could not update place" + error);
+    res.status(500).json({ message: "Could not update place" });
+    return;
   }
 
   res.status(200).json({ place: updatedPlace.toObject({ getters: true }) });
