@@ -3,35 +3,20 @@ const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
 const getCordinateForAddress = require("../utils/location");
 const Place=require('../models/place');
-const place = require("../models/place");
 
-let DUMMY_PLACES = [
-  {
-    ID: "P1",
-    Name: "Sigiriya",
-    Creator: "u1",
-    description: "This is a world heritance in Sri Lanka",
-    address: "Dambulla, Sigiriya",
-    location: {
-      lat: 49.4545,
-      lng: -45.544,
-    },
-  },
-  {
-    ID: "P2",
-    Name: "Galle Beach",
-    Creator: "u2",
-    description: "This is one of the popular beach in Sri Lanka",
-    address: "Galle road, galle",
-    location: {
-      lat: 59.4545,
-      lng: -65.544,
-    },
-  },
-];
 
-const getPlaces = (req, res, next) => {
-  console.log("places");
+
+const getPlaces = async (req, res, next) => {
+  let places;
+  try {
+    places=await Place.find();
+    res.status(200).json({ places });
+
+  } catch (error) {
+    console.log("Could not find places" + error);
+    res.status(500).json({ message: "Could not find places" });
+    return;
+};
 };
 
 const getPlaceById = async (req, res, next) => {
@@ -126,7 +111,7 @@ const updatePlace = async (req, res, next) => {
   }
   const { title, creator, description } = req.body;
   const placeId = req.params.pid;
-  let updatedPlace = new Place();
+  let updatedPlace;
   try {
     updatedPlace = await Place.findById(placeId);
   } catch (error) {
@@ -146,15 +131,34 @@ const updatePlace = async (req, res, next) => {
   res.status(200).json({ place: updatedPlace.toObject({ getters: true }) });
 };
 
-const deletePlace = (req, res, next) => {
+const deletePlace = async (req, res, next) => {
   const placeid = req.params.pid;
+  let place;
 
-  if (!DUMMY_PLACES.find((p) => p.ID === placeid)) {
-    throw new HttpError("No place would be found for the given ID", 404);
-    console.log("No place could be find for the given place ID");
+  try {
+    place = await Place.findById(placeid);
+    console.log(place);
+    } catch (error) {
+    console.log("Somehting went wrong");
   }
-  DUMMY_PLACES = DUMMY_PLACES.filter((p) => p.ID !== placeid);
-  res.status(200).json({ message: "Deleted Place" });
+
+  if (!place) {
+    // If place is null or undefined, it means the document was not found.
+    console.log("Place not found");
+    res.status(404).json({ message: "Place not found" });
+    return;
+  }
+
+  try {
+     await place.remove();
+    console.log('Place removed');
+    res.status(200).json({ message: "Delete the  Place" });
+
+  } catch (error) {
+    console.log("Could not delete place" + error);
+    res.status(500).json({ message: "Could not delete place" });
+    return;
+  }
 };
 
 exports.getPlaces = getPlaces;
