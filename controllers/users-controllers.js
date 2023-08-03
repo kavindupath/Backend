@@ -71,15 +71,25 @@ const signup = async (req, res, next) => {
   }
 };
 
-const login = (req, res, next)=>{
-    const {email, password}= req.body;
-    const identifiedUser= DUMMY_USERS.find(u=>u.email===email);
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
 
-    if(!identifiedUser || identifiedUser.password!== password){
-        throw new HttpError('Could not identify the user',401);
-    }
+  //validate the email
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email: email });
+  } catch (error) {
+    console.log("Somehting went wrong" + error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
 
-    res.json({message: 'Logged in'})
+  if (!existingUser || existingUser.password !== password) {
+    return res
+      .status(401)
+      .json({ message: "invalid credentials! Could not login" });
+  }
+
+  res.json({ message: "Logged in Successfully!" });
 };
 
 
