@@ -11,6 +11,7 @@ const userSchema=new Schema({
 });
 
 //validate whether the email is unique. Making the email property unique as in above only create a index in db
+// Apply the uniqueValidator plugin to the schema
 userSchema.plugin(uniqueValidator);
 
 module.exports=mongoose.model('User',userSchema);

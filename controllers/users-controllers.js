@@ -1,6 +1,7 @@
 const {v4:uuidv4} =require('uuid');
 const HttpError= require('../models/http-error');
 const {validationResult}= require('express-validator')
+const User=require('../models/user');
 
 
 const DUMMY_USERS=[
@@ -29,29 +30,45 @@ const getUsers = (req, res, next)=>{
     res.json({users:DUMMY_USERS});
 };
 
-const signup = (req, res, next)=>{
+const signup = async (req, res, next) => {
+  const validationError = validationResult(req);
+  if (!validationError.isEmpty()) {
+    console.log("Error in Signing");
+    return next(new HttpError("invalid input passed please check your data", 422)); 
+  }
 
-    const validationError = validationResult(req);
-    if (!validationError.isEmpty()) {
-      console.log("Error in Signing");
-      throw new HttpError("invalid input passed please check your data", 422);
-    }
+  const { name, email, password, places } = req.body;
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email: email });
+  } catch (error) {
+    console.log("Somehting went wrong" + error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
 
-    const {name, email, password}= req.body;
-    const hasUserAlreadyExist= DUMMY_USERS.find(u=>u.email===email);
+  if (existingUser) {
+    console.log("User Exits already!");
+    res
+      .status(422)
+      .json({ message: "User Exits already!, please log in instead!" });
+  }
+  const createdUser = new User({
+    name,
+    email,
+    image: "sample image",
+    password,
+    places,
+  });
 
-    if(hasUserAlreadyExist){
-        res.json({message:'User already exists'})
-    }
-    const createdUser={
-        id:uuidv4(),
-        name,
-        email,
-        password
-    };
-
-    DUMMY_USERS.push(createdUser);
-    res.status(200).json({user:createdUser});
+  try {
+    await createdUser.save();
+    res.status(200).json({ user: createdUser.toObject({ getter: true }) });
+    console.log("A new user registered");
+  } catch (err) {
+    console.log("Could regisster the new user" + error);
+    res.status(500).json({ message: "Could regisster the new user" });
+    return;
+  }
 };
 
 const login = (req, res, next)=>{
