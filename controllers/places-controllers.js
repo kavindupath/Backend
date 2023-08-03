@@ -3,6 +3,9 @@ const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
 const getCordinateForAddress = require("../utils/location");
 const Place = require("../models/place");
+const User = require("../models/user");
+const mongoose= require('mongoose');
+
 
 const getPlaces = async (req, res, next) => {
   let places;
@@ -88,10 +91,39 @@ const createPlace = async (req, res, next) => {
     image: "string url",
   });
 
-  //save the Place object with the data in the MONGO DB
+  //Find a user with the given user ID
+  let user;
   try {
-    await createdPlace.save();
-    console.log("A new Place saved");
+    user = await User.findById(creator);
+  } catch (error) {
+    console.log("Creating Place Failed, Please try again" + error);
+    res
+      .status(500)
+      .json({ message: "Creating Place Failed, Please try again" });
+  }
+
+  if (!user) {
+    res
+      .status(500)
+      .json({ message: "Could not find a user with the Given USERID" });
+    console.log(user);
+  }
+  //save the Place object with the data in the MONGO DB
+  //Here we will do independent multiple operations. if either one operation fails, we should abort the execution of the code
+  //Therefore we use sesions and transactions.
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    //Place saved
+    await createdPlace.save({ session: sess }); //Save only in this session. that's why sess parameter passed
+
+    //Place ID added to our user
+    user.places.push(createdPlace); //mongodb only grabs the placeID and add to the places array
+
+    //save the newly updated user
+    await user.save({ session: sess });
+
+    await sess.commitTransaction();
   } catch (err) {
     const error = new HttpError("creating place failed", 500);
     return next(error);
