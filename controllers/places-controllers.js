@@ -2,21 +2,18 @@ const HttpError = require("../models/http-error");
 const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
 const getCordinateForAddress = require("../utils/location");
-const Place=require('../models/place');
-
-
+const Place = require("../models/place");
 
 const getPlaces = async (req, res, next) => {
   let places;
   try {
-    places=await Place.find();
-    res.status(200).json({ places });
-
+    places = await Place.find();
   } catch (error) {
     console.log("Could not find places" + error);
     res.status(500).json({ message: "Could not find places" });
     return;
-};
+  }
+  res.status(200).json({ places });
 };
 
 const getPlaceById = async (req, res, next) => {
@@ -46,10 +43,9 @@ const getPlacesByUserId = async (req, res, next) => {
   const userID = req.params.uID;
   let places;
   try {
-     places = await Place.find({creator:userID});
-
+    places = await Place.find({ creator: userID });
   } catch (err) {
-    console.log('There are no places for the UID'+err);
+    console.log("There are no places for the UID" + err);
   }
 
   if (!places || places.length === 0) {
@@ -59,7 +55,7 @@ const getPlacesByUserId = async (req, res, next) => {
     );
     return next(error);
   }
-  res.json({ places:places.map(p=>p.toObject({getters:true}))});
+  res.json({ places: places.map((p) => p.toObject({ getters: true })) });
 };
 
 const createPlace = async (req, res, next) => {
@@ -95,12 +91,12 @@ const createPlace = async (req, res, next) => {
   //save the Place object with the data in the MONGO DB
   try {
     await createdPlace.save();
-    res.status(200).json({ place: createdPlace });
     console.log("A new Place saved");
   } catch (err) {
     const error = new HttpError("creating place failed", 500);
     return next(error);
   }
+  res.status(200).json({ place: createdPlace });
 };
 
 const updatePlace = async (req, res, next) => {
@@ -140,7 +136,7 @@ const deletePlace = async (req, res, next) => {
   try {
     place = await Place.findById(placeid);
     console.log(place);
-    } catch (error) {
+  } catch (error) {
     console.log("Somehting went wrong");
   }
 
@@ -152,15 +148,14 @@ const deletePlace = async (req, res, next) => {
   }
 
   try {
-     await place.remove();
-    console.log('Place removed');
-    res.status(200).json({ message: "Delete the  Place" });
-
+    await place.remove();
+    console.log("Place removed");
   } catch (error) {
     console.log("Could not delete place" + error);
     res.status(500).json({ message: "Could not delete place" });
     return;
   }
+  res.status(200).json({ message: "Delete the  Place" });
 };
 
 exports.getPlaces = getPlaces;
