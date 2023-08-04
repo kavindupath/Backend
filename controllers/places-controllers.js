@@ -166,7 +166,7 @@ const deletePlace = async (req, res, next) => {
   let place;
 
   try {
-    place = await Place.findById(placeid);
+    place = await Place.findById(placeid).populate('creator'); //populate() method is used to retrieve referenced data from another collection. In this case, it seems like the creator field of the Place document is referencing data from another collection (e.g., a User collection). By using populate('creator'), the code will automatically fetch the referenced data from the User collection and attach it to the retrieved Place document.
     console.log(place);
   } catch (error) {
     console.log("Somehting went wrong");
@@ -180,8 +180,15 @@ const deletePlace = async (req, res, next) => {
   }
 
   try {
-    await place.remove();
+    const sess= await mongoose.startSession();
+    sess.startTransaction();
+    await place.remove({session:sess});
+    //remove place from user
+    place.creator.places.pull(place);
+    await place.creator.save({session:sess});
+    await sess.commitTransaction();
     console.log("Place removed");
+    
   } catch (error) {
     console.log("Could not delete place" + error);
     res.status(500).json({ message: "Could not delete place" });
