@@ -3,7 +3,7 @@ const HttpError= require('../models/http-error');
 const {validationResult}= require('express-validator')
 const User=require('../models/user');
 
-const getUsers = async (req, res, next) => {
+exports.getUsers = async (req, res, next) => {
   let users;
   try {
     users = await User.find({}, "-password"); //remove password from response
@@ -14,7 +14,7 @@ const getUsers = async (req, res, next) => {
   res.json({ users:users.map(u=>u.toObject({getters:true}))});
 };
 
-const signup = async (req, res, next) => {
+exports.signup = async (req, res, next) => {
   const validationError = validationResult(req);
   if (!validationError.isEmpty()) {
     console.log("Error in Signing");
@@ -56,7 +56,7 @@ const signup = async (req, res, next) => {
 
 };
 
-const login = async (req, res, next) => {
+exports.login = async (req, res, next) => {
   const { email, password } = req.body;
 
   //validate the email
@@ -76,8 +76,3 @@ const login = async (req, res, next) => {
 
   res.json({ message: "Logged in Successfully!" });
 };
-
-
-exports.getUsers=getUsers;
-exports.signup=signup;
-exports.login=login;

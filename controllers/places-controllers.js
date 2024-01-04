@@ -7,7 +7,7 @@ const User = require("../models/user");
 const mongoose= require('mongoose');
 
 
-const getPlaces = async (req, res, next) => {
+exports.getPlaces = async (req, res, next) => {
   let places;
   try {
     places = await Place.find();
@@ -19,7 +19,7 @@ const getPlaces = async (req, res, next) => {
   res.status(200).json({ places });
 };
 
-const getPlaceById = async (req, res, next) => {
+exports.getPlaceById = async (req, res, next) => {
   let place;
   const placeId = req.params.pid;
 
@@ -42,7 +42,7 @@ const getPlaceById = async (req, res, next) => {
   res.json({ place: place.toObject({ getters: true }) });
 };
 
-const getPlacesByUserId = async (req, res, next) => {
+exports.getPlacesByUserId = async (req, res, next) => {
   const userID = req.params.uID;
   let places;
   try {
@@ -61,7 +61,7 @@ const getPlacesByUserId = async (req, res, next) => {
   res.json({ places: places.map((p) => p.toObject({ getters: true })) });
 };
 
-const createPlace = async (req, res, next) => {
+exports.createPlace = async (req, res, next) => {
   //validate the request
   const validationError = validationResult(req);
   if (!validationError.isEmpty()) {
@@ -131,7 +131,7 @@ const createPlace = async (req, res, next) => {
   res.status(200).json({ place: createdPlace });
 };
 
-const updatePlace = async (req, res, next) => {
+exports.updatePlace = async (req, res, next) => {
   const validationError = validationResult(req);
   if (!validationError.isEmpty()) {
     console.log("Error in updating places");
@@ -161,7 +161,7 @@ const updatePlace = async (req, res, next) => {
   res.status(200).json({ place: updatedPlace.toObject({ getters: true }) });
 };
 
-const deletePlace = async (req, res, next) => {
+exports.deletePlace = async (req, res, next) => {
   const placeid = req.params.pid;
   let place;
 
@@ -197,9 +197,4 @@ const deletePlace = async (req, res, next) => {
   res.status(200).json({ message: "Delete the  Place" });
 };
 
-exports.getPlaces = getPlaces;
-exports.getPlaceById = getPlaceById;
-exports.getPlacesByUserId = getPlacesByUserId;
-exports.createPlace = createPlace;
-exports.updatePlace = updatePlace;
-exports.deletePlace = deletePlace;
+
